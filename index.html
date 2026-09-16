@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="State of the art Voice Digit Recognition system using MFCC (Mel-Frequency Cepstral Coefficients) and K-Means Vector Quantization (VQ) codebook clustering.">
+  <title>Voice Digit Recognition | MFCC &amp; K-Means AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  <div class="ambient-glow glow-3"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand-section">
+        <div class="brand-badge">
+          <span class="badge-dot"></span>
+          <span class="badge-text">ACOUSTIC ML &amp; SPEECH AI</span>
+        </div>
+        <h1 class="brand-title">Voice Digit <span>Recognition</span></h1>
+        <p class="brand-subtitle">Powered by MFCC Feature Extraction &amp; K-Means Vector Quantization (VQ)</p>
+      </div>
+
+      <div class="status-card" id="statusCard">
+        <div class="status-indicator-ring">
+          <div class="status-dot" id="statusDot"></div>
+        </div>
+        <div class="status-info">
+          <span class="status-label">ENGINE STATUS</span>
+          <span class="status-text" id="statusText">Ready • Codebooks Loaded</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Engine Mode Switcher Tabs -->
+    <div class="engine-switch-container">
+      <div class="engine-switch-tabs">
+        <button class="engine-tab active" id="tabModeMfcc">
+          <span class="tab-icon">🔬</span>
+          <div class="tab-info">
+            <span class="tab-name">MFCC + K-Means VQ Classifier</span>
+            <span class="tab-desc">Mel-Filterbanks &bull; 16 Centroids/Digit &bull; VQ Distortion</span>
+          </div>
+          <span class="tab-pill-badge">ALGORITHMIC</span>
+        </button>
+        <button class="engine-tab" id="tabModeSpeech">
+          <span class="tab-icon">🎙</span>
+          <div class="tab-info">
+            <span class="tab-name">Continuous Web Speech API</span>
+            <span class="tab-desc">Real-time Browser Speech Engine</span>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Workspace Grid -->
+    <main class="main-grid">
+      <!-- Left / Center Column: Hero Display & Analytics -->
+      <section class="display-section">
+        <!-- Hero Digit Display Card -->
+        <div class="hero-digit-card" id="heroCard">
+          <div class="card-glass-reflection"></div>
+          <div class="hero-header">
+            <span class="tag-pill" id="modeTagPill">MFCC + K-MEANS RECOGNITION</span>
+            <span class="confidence-badge" id="confidenceBadge">Awaiting speech...</span>
+          </div>
+
+          <div class="digit-view-wrapper">
+            <div class="ripple-rings" id="rippleRings">
+              <span class="ripple r-1"></span>
+              <span class="ripple r-2"></span>
+              <span class="ripple r-3"></span>
+            </div>
+            <div class="digit-display" id="digitDisplay">—</div>
+          </div>
+
+          <div class="digit-meta">
+            <div class="word-representation" id="wordRepresentation">Speak or Test a Digit (0–9)</div>
+            <div class="phonetic-hint" id="phoneticHint">Click "Record Digit" or click any preset sample below</div>
+          </div>
+
+          <!-- Live Audio Visualizer Canvas inside Hero Card -->
+          <div class="visualizer-wrapper">
+            <canvas id="visualizerCanvas" width="640" height="70"></canvas>
+            <div class="mic-wave-indicator" id="micWaveIndicator">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- MFCC Feature Extraction Heatmap Card -->
+        <div class="analysis-card" id="mfccCard">
+          <div class="card-header-flex">
+            <div class="header-left">
+              <span class="card-icon">📊</span>
+              <span class="section-label">MFCC SPECTROGRAM MATRIX (13 CEPSTRAL COEFFICIENTS × TIME)</span>
+            </div>
+            <span class="badge-dim" id="mfccDimBadge">0 frames</span>
+          </div>
+          <div class="mfcc-canvas-wrapper">
+            <canvas id="mfccCanvas" width="640" height="110"></canvas>
+            <div class="mfcc-axes-labels">
+              <span>Low Freq (c0)</span>
+              <span>Time Frames &rarr;</span>
+              <span>High Freq (c12)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- K-Means VQ Distortion Distance Comparison Card -->
+        <div class="analysis-card" id="kmeansCard">
+          <div class="card-header-flex">
+            <div class="header-left">
+              <span class="card-icon">📐</span>
+              <div>
+                <span class="section-label">K-MEANS CLUSTERING VQ DISTORTION COMPARISON</span>
+                <span class="card-subnote">Quantization Error: D(X, C) = (1/T) &sum; min ||x<sub>t</sub> - c<sub>k</sub>||<sup>2</sup> • Lowest = Winner</span>
+              </div>
+            </div>
+            <span class="winner-pill" id="kmeansWinnerPill">WINNER: —</span>
+          </div>
+          <div class="kmeans-bars-grid" id="kmeansBarsGrid">
+            <!-- 10 animated bars for digits 0 to 9 -->
+          </div>
+        </div>
+
+        <!-- Quick Presets / 1-Click Audio Test Bar -->
+        <div class="presets-card" id="presetsCard">
+          <div class="presets-header">
+            <span class="section-label">⚡ 1-CLICK AUDIO SAMPLES (PRE-RECORDED REFERENCE VOICES)</span>
+            <span class="presets-tip">Click any digit to instantly feed real voice into the MFCC + K-Means pipeline:</span>
+          </div>
+          <div class="preset-chips-row">
+            <button class="preset-chip" data-digit="0">0 <small>ZERO</small></button>
+            <button class="preset-chip" data-digit="1">1 <small>ONE</small></button>
+            <button class="preset-chip" data-digit="2">2 <small>TWO</small></button>
+            <button class="preset-chip" data-digit="3">3 <small>THREE</small></button>
+            <button class="preset-chip" data-digit="4">4 <small>FOUR</small></button>
+            <button class="preset-chip" data-digit="5">5 <small>FIVE</small></button>
+            <button class="preset-chip" data-digit="6">6 <small>SIX</small></button>
+            <button class="preset-chip" data-digit="7">7 <small>SEVEN</small></button>
+            <button class="preset-chip" data-digit="8">8 <small>EIGHT</small></button>
+            <button class="preset-chip" data-digit="9">9 <small>NINE</small></button>
+          </div>
+          <div class="file-upload-row">
+            <label for="wavFileInput" class="btn-file-upload">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              Upload Custom WAV Audio File
+            </label>
+            <input type="file" id="wavFileInput" accept=".wav,audio/wav">
+            <span class="upload-hint">Upload any 16kHz mono or stereo WAV of a spoken digit</span>
+          </div>
+        </div>
+
+        <!-- Live Speech Transcript Feed (Active in Continuous Speech Mode) -->
+        <div class="transcript-feed-card" id="transcriptCard" style="display: none;">
+          <div class="feed-header">
+            <span class="feed-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                <line x1="12" y1="19" x2="12" y2="22"/>
+              </svg>
+            </span>
+            <span class="feed-title">LIVE SPEECH TRANSCRIPT</span>
+            <span class="feed-state-badge" id="interimBadge">Idle</span>
+          </div>
+          <div class="transcript-box" id="transcriptBox">
+            <span class="transcript-placeholder" id="transcriptPlaceholder">Click "Start Listening" and speak into your microphone...</span>
+            <span class="transcript-final" id="transcriptFinal"></span>
+            <span class="transcript-interim" id="transcriptInterim"></span>
+          </div>
+        </div>
+
+        <!-- Digit Sequence Stream (Multi-digit / PIN accumulation) -->
+        <div class="sequence-card">
+          <div class="sequence-header">
+            <div class="sequence-title-group">
+              <span class="sequence-title">DIGIT STREAM BUFFER</span>
+              <span class="counter-badge" id="streamCounter">0 digits</span>
+            </div>
+            <div class="sequence-actions">
+              <button class="action-chip" id="btnCopyStream" title="Copy digit stream">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                Copy
+              </button>
+              <button class="action-chip" id="btnBackspaceStream" title="Delete last digit">
+                ⌫ Backspace
+              </button>
+              <button class="action-chip danger" id="btnClearStream" title="Clear all digits">
+                Clear
+              </button>
+            </div>
+          </div>
+          <div class="sequence-tape" id="sequenceTape">
+            <span class="tape-empty-msg" id="tapeEmptyMsg">Digits spoken in succession accumulate here</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Controls, Matrix & History -->
+      <aside class="sidebar-section">
+        <!-- Main Controls Card -->
+        <div class="controls-card">
+          <div class="controls-header">
+            <span class="section-label">AUDIO RECORDING &amp; CAPTURE</span>
+          </div>
+
+          <!-- Primary MFCC Record Button -->
+          <div class="primary-action-group" id="mfccActionGroup">
+            <button class="mic-toggle-btn mfcc-rec-btn" id="btnRecordDigit">
+              <div class="mic-icon-wrapper">
+                <svg class="mic-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                  <line x1="12" y1="19" x2="12" y2="22"/>
+                </svg>
+              </div>
+              <span class="btn-text" id="btnRecordText">Record Digit (1.5s)</span>
+              <div class="rec-progress-bar" id="recProgressBar"></div>
+            </button>
+          </div>
+
+          <!-- Web Speech Continuous Mic Button -->
+          <div class="primary-action-group" id="speechActionGroup" style="display: none;">
+            <button class="mic-toggle-btn" id="btnToggleMic">
+              <div class="mic-icon-wrapper">
+                <svg class="mic-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                  <line x1="12" y1="19" x2="12" y2="22"/>
+                </svg>
+              </div>
+              <span class="btn-text" id="btnMicText">Start Continuous Listening</span>
+            </button>
+          </div>
+
+          <div class="toggles-grid">
+            <label class="toggle-item">
+              <input type="checkbox" id="checkSoundEffects" checked>
+              <span class="toggle-track">
+                <span class="toggle-knob"></span>
+              </span>
+              <span class="toggle-title">Audio Synth Chime</span>
+            </label>
+
+            <label class="toggle-item">
+              <input type="checkbox" id="checkVoiceReadout">
+              <span class="toggle-track">
+                <span class="toggle-knob"></span>
+              </span>
+              <span class="toggle-title">Voice Echo (TTS)</span>
+            </label>
+
+            <label class="toggle-item" id="autoRestartItem" style="display: none;">
+              <input type="checkbox" id="checkAutoRestart" checked>
+              <span class="toggle-track">
+                <span class="toggle-knob"></span>
+              </span>
+              <span class="toggle-title">Continuous Listening</span>
+            </label>
+          </div>
+
+          <div class="locale-selector-row" id="localeRow" style="display: none;">
+            <label for="selectLocale" class="locale-label">Speech Recognition Language</label>
+            <select id="selectLocale" class="custom-select">
+              <option value="en-US">English (US)</option>
+              <option value="en-GB">English (UK)</option>
+              <option value="en-IN" selected>English (India)</option>
+              <option value="es-ES">Spanish (Español)</option>
+              <option value="fr-FR">French (Français)</option>
+              <option value="de-DE">German (Deutsch)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 0-9 Interactive Voice Matrix / Dialpad -->
+        <div class="dialpad-card">
+          <div class="dialpad-header">
+            <span class="section-label">VOICE DIALPAD MATRIX</span>
+            <span class="dialpad-tip">Lights up on detection</span>
+          </div>
+
+          <div class="dialpad-grid">
+            <button class="pad-key" data-digit="1" id="key-1">
+              <span class="pad-num">1</span>
+              <span class="pad-sub">ONE</span>
+            </button>
+            <button class="pad-key" data-digit="2" id="key-2">
+              <span class="pad-num">2</span>
+              <span class="pad-sub">TWO</span>
+            </button>
+            <button class="pad-key" data-digit="3" id="key-3">
+              <span class="pad-num">3</span>
+              <span class="pad-sub">THREE</span>
+            </button>
+            <button class="pad-key" data-digit="4" id="key-4">
+              <span class="pad-num">4</span>
+              <span class="pad-sub">FOUR</span>
+            </button>
+            <button class="pad-key" data-digit="5" id="key-5">
+              <span class="pad-num">5</span>
+              <span class="pad-sub">FIVE</span>
+            </button>
+            <button class="pad-key" data-digit="6" id="key-6">
+              <span class="pad-num">6</span>
+              <span class="pad-sub">SIX</span>
+            </button>
+            <button class="pad-key" data-digit="7" id="key-7">
+              <span class="pad-num">7</span>
+              <span class="pad-sub">SEVEN</span>
+            </button>
+            <button class="pad-key" data-digit="8" id="key-8">
+              <span class="pad-num">8</span>
+              <span class="pad-sub">EIGHT</span>
+            </button>
+            <button class="pad-key" data-digit="9" id="key-9">
+              <span class="pad-num">9</span>
+              <span class="pad-sub">NINE</span>
+            </button>
+            <button class="pad-key key-clear" id="key-clear-all" title="Clear State">
+              <span class="pad-action-icon">↺</span>
+              <span class="pad-sub">RESET</span>
+            </button>
+            <button class="pad-key" data-digit="0" id="key-0">
+              <span class="pad-num">0</span>
+              <span class="pad-sub">ZERO</span>
+            </button>
+            <button class="pad-key key-mic-quick" id="key-mic-quick" title="Quick Record Trigger">
+              <span class="pad-action-icon">🎙</span>
+              <span class="pad-sub">RECORD</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Recognition History Log -->
+        <div class="history-card">
+          <div class="history-header">
+            <span class="section-label">DETECTION LOG</span>
+            <button class="btn-clear-history" id="btnClearHistory" title="Clear history">Clear</button>
+          </div>
+          <div class="history-list" id="historyList">
+            <div class="history-empty" id="historyEmpty">
+              No digits recognized yet. Click "Record Digit" or test a preset!
+            </div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-shortcuts">
+        <span class="shortcut-tip">💡 <strong>Interactive Testing:</strong> Click <em>"Record Digit (1.5s)"</em> and say a digit, click any <em>preset chip</em>, or press <kbd>0</kbd>–<kbd>9</kbd> on your keyboard.</span>
+      </div>
+      <div class="footer-meta">
+        <span>MFCC (13-D) &bull; K-Means Vector Quantization (16 Centroids)</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Notification Toast -->
+  <div class="toast" id="toast">Notification</div>
+
+  <script src="app.js"></script>
+</body>
+</html>
